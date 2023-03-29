@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VST</title>
+    <script src="https://unpkg.com/jspsych@7.2.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.1.1/dist/index.browser.min.js"></script>
+    <script src="plugins/plugin-browser-check.js"></script>
+    <link href="https://unpkg.com/jspsych@7.2.1/css/jspsych.css" rel="stylesheet" type="text/css" />
+</head>
+<body></body>
+  <script>
+
+    /* create timeline */
+    var timeline = [];
+
+        /* start the experiment */
+    var jsPsych = initJsPsych({
+     });
+
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    timeline.push(welcome);
+
+    var target ={
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "TARGET",
+        choice: ['z','m']
+    };
+    // timeline.push(target);
+
+    var test_stimuli = [
+        {stimulus: "TARGET"},
+        {stimulus: "WORD"}
+    ];
+
+    var test ={
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: jsPsych.timelineVariable('stimulus'),
+        choices: ['z', 'm']
+    };
+
+    var test_procedure = {
+        timeline: [welcome, test_stimuli],
+        timeline_variables: test_stimuli
+    };
+
+    timeline.push(test_procedure);
+
+
+
+    jsPsych.run(timeline);
+  </script>
+</html>

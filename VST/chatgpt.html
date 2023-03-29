@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ChatGPT</title>
+    <script src="jspsych/dist/jspsych.js"></script>
+    <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/dist/plugin-fullscreen.js"></script>
+    <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+<body></body>
+  <script>
+// Define an array of words
+const wordList = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon'];
+
+// Select 4 random words from the array
+const randomWords = [];
+while (randomWords.length < 4) {
+  const randomIndex = Math.floor(Math.random() * wordList.length);
+  const randomWord = wordList[randomIndex];
+  if (!randomWords.includes(randomWord)) {
+    randomWords.push(randomWord);
+  }
+}
+
+// Divide the screen into 4 quadrants
+const quadrantSize = window.innerWidth / 2;
+const centerX = window.innerWidth / 2;
+const centerY = window.innerHeight / 2;
+const quadrants = [
+  { x: 0, y: 0 },
+  { x: quadrantSize, y: 0 },
+  { x: 0, y: quadrantSize },
+  { x: quadrantSize, y: quadrantSize },
+];
+
+// Display the selected words in the center of each quadrant
+for (let i = 0; i < 4; i++) {
+  const wordElement = document.createElement('div');
+  wordElement.classList.add('word');
+  wordElement.textContent = randomWords[i];
+  wordElement.style.position = 'absolute';
+  wordElement.style.top = centerY + quadrants[i].y - (wordElement.offsetHeight / 2) + 'px';
+  wordElement.style.left = centerX + quadrants[i].x - (wordElement.offsetWidth / 2) + 'px';
+  document.body.appendChild(wordElement);
+}
+</script>
+</html>

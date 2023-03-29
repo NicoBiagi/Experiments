@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NewChatGPT</title>
+    <script src="jspsych/dist/jspsych.js"></script>
+    <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/dist/plugin-fullscreen.js"></script>
+    <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+<body></body>
+  <script>
+
+        /* create timeline */
+        var timeline = [];
+
+/* start the experiment */
+var jsPsych = initJsPsych({
+});
+
+// Define an array of words
+const wordList = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon'];
+
+// Select 4 random words from the array
+const randomWords = [];
+while (randomWords.length < 4) {
+  const randomIndex = Math.floor(Math.random() * wordList.length);
+  const randomWord = wordList[randomIndex];
+  if (!randomWords.includes(randomWord)) {
+    randomWords.push(randomWord);
+  }
+}
+
+// Define a jsPsych trial to display the words
+var wordDisplayTrial = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: function() {
+    const quadrantSize = window.innerWidth / 4;
+    const centerX = window.innerWidth / 3;
+    const centerY = window.innerHeight / 3;
+    const quadrants = [
+      { x: 0, y: 0 },
+      { x: quadrantSize, y: 0 },
+      { x: 0, y: quadrantSize },
+      { x: quadrantSize, y: quadrantSize },
+    ];
+    let html = '';
+    for (let i = 0; i < 4; i++) {
+      html += `<div class="word" style="position:absolute; top:${centerY + quadrants[i].y}px; left:${centerX + quadrants[i].x}px;">${randomWords[i]}</div>`;
+    }
+    return html;
+  },
+  choices: ['z', 'm'],
+  trial_duration: 3000,
+};
+
+var fixation = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '<div style="font-size:60px;">+</div>',
+  choices: "NO_KEYS",
+  trial_duration: 1000,
+};
+// Define a jsPsych timeline and add the word display trial
+var test_procedure = {
+  timeline: [fixation, wordDisplayTrial],
+}
+// timeline.push(wordDisplayTrial);
+timeline.push(test_procedure);
+
+jsPsych.run(timeline);
+
+
+</script>
+</html>
+
