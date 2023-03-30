@@ -28,12 +28,6 @@ $.getJSON('shuffled_stimuli.js', function(data) {
   items.forEach(item => {
     item.stimuli = item.stimuli.split(',');
   });
-  
-  // Randomize the order of the items
-  jsPsych.randomization.shuffle(items);
-  
-  // Use the randomized items in your experiment
-  // ...
 });
 
 var names = []
@@ -52,7 +46,7 @@ const wordList = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'gra
 const randomWords = [];
 while (randomWords.length < 4) {
   const randomIndex = Math.floor(Math.random() * firstRow.length);
-  const randomWord = firstRow[randomIndex];
+  const randomWord = wordList[randomIndex];
   if (!randomWords.includes(randomWord)) {
     randomWords.push(randomWord);
   }
