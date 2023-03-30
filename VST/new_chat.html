@@ -5,6 +5,8 @@
     <script src="jspsych/dist/jspsych.js"></script>
     <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
     <script src="jspsych/dist/plugin-fullscreen.js"></script>
+    <script src="shuffled_stimuli.js"></script>
+    <script src="jquery-3.6.4.min.js"></script>
     <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
 <body></body>
@@ -17,18 +19,45 @@
 var jsPsych = initJsPsych({
 });
 
+// Load JS file
+$.getJSON('shuffled_stimuli.js', function(data) {
+  // Get the data from the JS file
+  const items = data.items;
+  
+  // Split the comma-separated string in one of the columns
+  items.forEach(item => {
+    item.stimuli = item.stimuli.split(',');
+  });
+  
+  // Randomize the order of the items
+  jsPsych.randomization.shuffle(items);
+  
+  // Use the randomized items in your experiment
+  // ...
+});
+
+var names = []
+for(x in shuffled_stimuli)
+   names.push(shuffled_stimuli[x].stimuli);
+
+myArray = names.map(str => str.split(","));
+
+firstRow = myArray.pop();
+
+
 // Define an array of words
 const wordList = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon'];
 
 // Select 4 random words from the array
 const randomWords = [];
 while (randomWords.length < 4) {
-  const randomIndex = Math.floor(Math.random() * wordList.length);
-  const randomWord = wordList[randomIndex];
+  const randomIndex = Math.floor(Math.random() * firstRow.length);
+  const randomWord = firstRow[randomIndex];
   if (!randomWords.includes(randomWord)) {
     randomWords.push(randomWord);
   }
 }
+
 
 // Define a jsPsych trial to display the words
 var wordDisplayTrial = {
