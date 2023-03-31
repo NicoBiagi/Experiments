@@ -38,20 +38,15 @@ myArray = names.map(str => str.split(","));
 
 firstRow = myArray.pop();
 
-
-// Define an array of words
-const wordList = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon'];
-
-// Select 4 random words from the array
-const randomWords = [];
-while (randomWords.length < 4) {
-  const randomIndex = Math.floor(Math.random() * firstRow.length);
-  const randomWord = wordList[randomIndex];
-  if (!randomWords.includes(randomWord)) {
-    randomWords.push(randomWord);
+function shuffleArray(firstRow) {
+  for (let i = firstRow.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [firstRow[i], firstRow[j]] = [firstRow[j], firstRow[i]];
   }
+  return firstRow;
 }
 
+shuffleArray(firstRow);
 
 // Define a jsPsych trial to display the words
 var wordDisplayTrial = {
@@ -68,7 +63,7 @@ var wordDisplayTrial = {
     ];
     let html = '';
     for (let i = 0; i < 4; i++) {
-      html += `<div class="word" style="position:absolute; top:${centerY + quadrants[i].y}px; left:${centerX + quadrants[i].x}px;">${randomWords[i]}</div>`;
+      html += `<div class="word" style="position:absolute; top:${centerY + quadrants[i].y}px; left:${centerX + quadrants[i].x}px;">${firstRow[i]}</div>`;
     }
     return html;
   },
@@ -85,13 +80,15 @@ var fixation = {
 // Define a jsPsych timeline and add the word display trial
 var test_procedure = {
   timeline: [fixation, wordDisplayTrial],
+  repetitions: 5,
+  timeline_variables:  firstRow
 }
 // timeline.push(wordDisplayTrial);
 timeline.push(test_procedure);
 
 jsPsych.run(timeline);
 
-
+firstRow = myArray.pop();
 </script>
 </html>
 
