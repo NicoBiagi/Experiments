@@ -11,16 +11,9 @@
   </head>
 <body></body>
   <script>
-
-        /* create timeline */
-        var timeline = [];
-
-/* start the experiment */
-var jsPsych = initJsPsych({
-});
-
-// Load JS file
-$.getJSON('shuffled_stimuli.js', function(data) {
+  // Load JS file
+  $.getJSON('shuffled_stimuli.js', function(data) {
+  
   // Get the data from the JS file
   const items = data.items;
   
@@ -29,15 +22,16 @@ $.getJSON('shuffled_stimuli.js', function(data) {
     item.stimuli = item.stimuli.split(',');
   });
 });
+  
+  // Convert JS to array
+  var names = []
+  for(x in shuffled_stimuli)
+  names.push(shuffled_stimuli[x].stimuli);
 
-var names = []
-for(x in shuffled_stimuli)
-   names.push(shuffled_stimuli[x].stimuli);
+  // split the comma-separated words
+  myArray = names.map(str => str.split(","));
 
-myArray = names.map(str => str.split(","));
-
-firstRow = myArray.pop();
-
+  // define a function to shuffle the array
 function shuffleArray(firstRow) {
   for (let i = firstRow.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -46,30 +40,38 @@ function shuffleArray(firstRow) {
   return firstRow;
 }
 
-shuffleArray(firstRow);
+  /* create timeline */
+  var timeline = [];
 
-// Define a jsPsych trial to display the words
-var wordDisplayTrial = {
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: function() {
-    const quadrantSize = window.innerWidth / 4;
-    const centerX = window.innerWidth / 3;
-    const centerY = window.innerHeight / 3;
-    const quadrants = [
-      { x: 0, y: 0 },
-      { x: quadrantSize, y: 0 },
-      { x: 0, y: quadrantSize },
-      { x: quadrantSize, y: quadrantSize },
-    ];
-    let html = '';
-    for (let i = 0; i < 4; i++) {
-      html += `<div class="word" style="position:absolute; top:${centerY + quadrants[i].y}px; left:${centerX + quadrants[i].x}px;">${firstRow[i]}</div>`;
-    }
-    return html;
-  },
-  choices: ['z', 'm'],
-  trial_duration: 3000,
-};
+  /* start the experiment */
+  var jsPsych = initJsPsych({
+});
+
+  // Define a jsPsych trial to display the words
+  var wordDisplayTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: function() {
+      const quadrantSize = window.innerWidth / 4;
+      const centerX = window.innerWidth / 3;
+      const centerY = window.innerHeight / 3;
+      const quadrants = [
+        { x: 0, y: 0 },
+        { x: quadrantSize, y: 0 },
+        { x: 0, y: quadrantSize },
+        { x: quadrantSize, y: quadrantSize },
+      ];
+      const firstRow = myArray.pop();
+      shuffleArray(firstRow);
+
+      let html = '';
+      for (let i = 0; i < 4; i++) {
+        html += `<div class="word" style="position:absolute; top:${centerY + quadrants[i].y}px; left:${centerX + quadrants[i].x}px;">${firstRow[i]}</div>`;
+      }
+      return html;
+    },
+    choices: ['z', 'm'],
+    trial_duration: 3000,
+  };
 
 var fixation = {
   type: jsPsychHtmlKeyboardResponse,
@@ -77,18 +79,19 @@ var fixation = {
   choices: "NO_KEYS",
   trial_duration: 1000,
 };
+
 // Define a jsPsych timeline and add the word display trial
 var test_procedure = {
   timeline: [fixation, wordDisplayTrial],
   repetitions: 5,
   timeline_variables:  firstRow
 }
+
 // timeline.push(wordDisplayTrial);
 timeline.push(test_procedure);
 
 jsPsych.run(timeline);
 
-firstRow = myArray.pop();
 </script>
 </html>
 
