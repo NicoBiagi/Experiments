@@ -7,6 +7,7 @@
     <script src="jspsych/dist/plugin-fullscreen.js"></script>
     <script src="shuffled_stimuli.js"></script>
     <script src="jquery-3.6.4.min.js"></script>
+    <script src="general_instructions.js"></script>
     <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
 <body></body>
@@ -28,20 +29,27 @@
   for(x in shuffled_stimuli)
   names.push(shuffled_stimuli[x].stimuli);
 
+  var CR = []
+  for(x in shuffled_stimuli)
+  CR.push(shuffled_stimuli[x].correct_response)
+
   // split the comma-separated words
   myArray = names.map(str => str.split(","));
+ 
 
   // define a function to shuffle the array
-function shuffleArray(firstRow) {
-  for (let i = firstRow.length - 1; i > 0; i--) {
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [firstRow[i], firstRow[j]] = [firstRow[j], firstRow[i]];
+    [array[i], array[j]] = [array[j], array[i]];
   }
-  return firstRow;
+  return array;
 }
 
   /* create timeline */
   var timeline = [];
+
+  var trialcorrect=[];
 
   /* start the experiment */
   var jsPsych = initJsPsych({
@@ -53,14 +61,14 @@ function shuffleArray(firstRow) {
     stimulus: function() {
       const quadrantSize = window.innerWidth / 4;
       const centerX = window.innerWidth / 3;
-      const centerY = window.innerHeight / 3;
+      const centerY = window.innerHeight / 4;
       const quadrants = [
         { x: 0, y: 0 },
         { x: quadrantSize, y: 0 },
         { x: 0, y: quadrantSize },
         { x: quadrantSize, y: quadrantSize },
       ];
-      const firstRow = myArray.pop();
+      const firstRow = myArray.shift();
       shuffleArray(firstRow);
 
       let html = '';
@@ -71,7 +79,17 @@ function shuffleArray(firstRow) {
     },
     choices: ['z', 'm'],
     trial_duration: 3000,
-  };
+    data:{
+            task: 'VST',
+            correct_response: function() {
+      return CR.pop();
+    },
+        },
+        on_finish: function(data) {
+          correct_response = CR.shift();
+          data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+        }
+    };
 
 var fixation = {
   type: jsPsychHtmlKeyboardResponse,
@@ -80,15 +98,48 @@ var fixation = {
   trial_duration: 1000,
 };
 
+var outcome = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: function (data) {
+            if (jsPsych.data.get().last(1).trials[0].correct == true) {
+                return '<p class="outcome_qm" style="font-size:30px;font-weight:bold;">CORRECT</p>'
+            } else if (jsPsych.data.get().last(1).trials[0].response == null) {
+                return '<p class="outcome_qm" style="font-size:30px;font-weight:bold;">MISSED</p>'
+            }
+            else {
+                return '<p class="outcome_qm" style="font-size:30px;font-weight:bold;">INCORRECT</p>'
+            }
+        },
+        trial_duration: 1000,
+        data: {
+            task: "feedback"
+        }
+    };
+
+    /* create the end screen */
+    var end = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<p>You're done! A .csv file containing your data should be automatically downloading right now.
+        Check your default downloads location to find it. Once you've found it you can close the experiment.</p>`,
+        on_load: function () {
+          jsPsych.data.get().localSave('csv','VST-data.csv');
+        }
+    };
+
 // Define a jsPsych timeline and add the word display trial
 var test_procedure = {
-  timeline: [fixation, wordDisplayTrial],
-  repetitions: 5,
-  timeline_variables:  firstRow
+  timeline: [fixation, wordDisplayTrial, outcome],
+  repetitions: 2,
+          data: {
+            phase: 'practice',
+            block: 'practice'
+        },
 }
 
-// timeline.push(wordDisplayTrial);
+timeline.push(general_instructions);
 timeline.push(test_procedure);
+timeline.push(end);
+
 
 jsPsych.run(timeline);
 

@@ -1,7 +1,7 @@
 var shuffled_stimuli = [
   {
     "block": "neutral",
-    "stimuli": "test,test,test,zxcv",
+    "stimuli": "A,A,A,B",
     "correct_response": "z"
   },
   {
