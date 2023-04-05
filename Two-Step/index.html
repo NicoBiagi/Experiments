@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visual Search Task</title>
+    <script src="jspsych/dist/jspsych.js"></script>
+    <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/dist/plugin-fullscreen.js"></script>
+    <script src="shuffled_stimuli.js"></script>
+    <script src="jquery-3.6.4.min.js"></script>
+    <script src="general_instructions.js"></script>
+    <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+<body></body>
+  <script>
+  // Load JS file
+  $.getJSON('shuffled_stimuli.js', function(data) {
+  
+  // Get the data from the JS file
+  const items = data.items;
+  
+  // Split the comma-separated string in one of the columns
+  items.forEach(item => {
+    item.stimuli = item.stimuli.split(',');
+  });
+});
+  
+  // Convert JS to array
+  var names = []
+  for(x in shuffled_stimuli)
+  names.push(shuffled_stimuli[x].stimuli);
+
+  var CR = []
+  for(x in shuffled_stimuli)
+  CR.push(shuffled_stimuli[x].correct_response)
+
+  // split the comma-separated words
+  myArray = names.map(str => str.split(","));
+ 
+
+  // define a function to shuffle the array
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+  /* create timeline */
+  var timeline = [];
+
+  var trialcorrect=[];
+
+  /* start the experiment */
+  var jsPsych = initJsPsych({
+});
+
+  // Define a jsPsych trial to display the words
+  var wordDisplayTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: function() {
+      const quadrantSize = window.innerWidth / 4;
+      const centerX = window.innerWidth / 3;
+      const centerY = window.innerHeight / 4;
+      const quadrants = [
+        { x: 0, y: 0 },
+        { x: quadrantSize, y: 0 },
+        { x: 0, y: quadrantSize },
+        { x: quadrantSize, y: quadrantSize },
+      ];
+      const firstRow = myArray.shift();
+      shuffleArray(firstRow);
+
+      let html = '';
+      for (let i = 0; i < 4; i++) {
+        html += `<div class="word" style="position:absolute; top:${centerY + quadrants[i].y}px; left:${centerX + quadrants[i].x}px;">${firstRow[i]}</div>`;
+      }
+      return html;
+    },
+    choices: ['z', 'm'],
+    trial_duration: 3000,
+    data:{
+            task: 'VST',
+            correct_response: function() {
+      return CR.pop();
+    },
+        },
+        on_finish: function(data) {
+          correct_response = CR.shift();
+          data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+        }
+    };
+
+var fixation = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '<div style="font-size:60px;">+</div>',
+  choices: "NO_KEYS",
+  trial_duration: 1000,
+};
+
+var outcome = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: function (data) {
+            if (jsPsych.data.get().last(1).trials[0].correct == true) {
+                return '<p class="outcome_qm" style="font-size:30px;font-weight:bold;">CORRECT</p>'
+            } else if (jsPsych.data.get().last(1).trials[0].response == null) {
+                return '<p class="outcome_qm" style="font-size:30px;font-weight:bold;">MISSED</p>'
+            }
+            else {
+                return '<p class="outcome_qm" style="font-size:30px;font-weight:bold;">INCORRECT</p>'
+            }
+        },
+        trial_duration: 1000,
+        data: {
+            task: "feedback"
+        }
+    };
+
+    /* create the end screen */
+    var end = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<p>You're done! A .csv file containing your data should be automatically downloading right now.
+        Check your default downloads location to find it. Once you've found it you can close the experiment.</p>`,
+        on_load: function () {
+          jsPsych.data.get().localSave('csv','VST-data.csv');
+        }
+    };
+
+// Define a jsPsych timeline and add the word display trial
+var test_procedure = {
+  timeline: [fixation, wordDisplayTrial, outcome],
+  repetitions: 2,
+          data: {
+            phase: 'practice',
+            block: 'practice'
+        },
+}
+
+timeline.push(general_instructions);
+timeline.push(test_procedure);
+timeline.push(end);
+
+
+jsPsych.run(timeline);
+
+</script>
+</html>
+
